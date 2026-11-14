@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oosaudit"
+version = "0.1.0"
+description = "A post-publication audit of the Qlib Alpha158 model zoo on Chinese A-shares"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Le Nam Khanh" }]
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "pyqlib==0.9.7",
+  "pandas>=2.2,<2.3",
+  "numpy>=1.26,<2.3",
+  "scipy>=1.11",
+  "arch>=7",
+  "pyarrow>=14",
+  "lightgbm>=4",
+]
+
+[project.optional-dependencies]
+models = ["torch>=2.2", "xgboost>=2", "catboost>=1.2"]
+figures = ["matplotlib>=3.8"]
+dev = ["pytest>=8", "ruff>=0.6", "statsmodels>=0.14"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["oosaudit", "published"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
