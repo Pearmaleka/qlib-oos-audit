@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 from oosaudit import audit, backtest, data
+from oosaudit.run import VARIANTS
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results" / "backtests"
@@ -28,7 +29,8 @@ WINDOWS = {
 def tags(protocol: str, model: str, per_seed: bool) -> list[str]:
     seeds = sorted(int(p.stem[4:]) for p in (audit.PRED_DIR / protocol / model).glob("seed*.parquet"))
     out = ["ens"]
-    if per_seed and len(seeds) > 1:
+    # Ablation variants are backtested as seed ensembles only.
+    if per_seed and len(seeds) > 1 and model not in VARIANTS:
         out += [f"seed{s}" for s in seeds]
     return out
 
@@ -66,9 +68,11 @@ def main() -> None:
             continue
         models = args.models.split(",") if args.models else sorted(p.name for p in pdir.iterdir() if p.is_dir())
         for m in models:
+            newest = max(p.stat().st_mtime for p in (pdir / m).glob("seed*.parquet"))
             for tag in tags(protocol, m, args.per_seed and protocol in ("pub", "null")):
                 path = OUT / protocol / f"{m}_{tag}.parquet"
-                if path.exists() and not args.force:
+                # Skip only backtests that are newer than every prediction they depend on.
+                if path.exists() and path.stat().st_mtime >= newest and not args.force:
                     continue
                 subprocess.run([sys.executable, __file__, "--job", f"{protocol}:{m}:{tag}"], check=False)
 

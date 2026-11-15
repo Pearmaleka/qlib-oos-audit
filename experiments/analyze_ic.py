@@ -111,6 +111,8 @@ def staleness(ic: pd.DataFrame) -> dict:
             r[f"{proto}_sd"] = float(per_seed.std()) if len(per_seed) > 1 else 0.0
             x = ens_daily(ic, proto, m, "recent")["rank_ic"].to_numpy()
             r[f"{proto}_ens_t"] = float(np.nanmean(x) / metrics.newey_west_se(x))
+        if r and "refit" not in r:
+            rows[m] = r
         if "refit" in r:
             fresh_pub = ic[(ic.protocol == "pub") & (ic.model == m) & (ic.seed != audit.ENSEMBLE)]
             r["pub_in_published"] = float(
@@ -198,15 +200,96 @@ def yearly(ic: pd.DataFrame) -> dict:
     return out
 
 
+ABLATION = {
+    # variant: (base model, what changed)
+    "lightgbm_rank": ("lightgbm", "label: CSRankNorm instead of CSZScoreNorm"),
+    "xgboost_rank": ("xgboost", "label: CSRankNorm instead of CSZScoreNorm"),
+    "catboost_rank": ("catboost", "label: CSRankNorm instead of CSZScoreNorm"),
+    "doubleensemble_rank": ("doubleensemble", "label: CSRankNorm instead of CSZScoreNorm"),
+    "mlp_rank": ("mlp", "label: CSRankNorm instead of CSZScoreNorm"),
+    "linear_z": ("linear", "label: CSZScoreNorm instead of CSRankNorm"),
+    "lightgbm_f20": ("lightgbm", "features: the 20 columns of the recurrent configs"),
+}
+# Label normalisation of each official config.
+RANK_LABEL = {"linear", "gru", "lstm", "alstm", "transformer", "localformer", "tcn"}
+
+
+def ablation(ic_all: pd.DataFrame) -> dict:
+    """Exploratory: one processor change to an official config, scored like the models."""
+    out = {}
+    for variant, (base, what) in ABLATION.items():
+        if variant not in set(ic_all.model):
+            continue
+        row = {"base": base, "change": what}
+        for name, m in (("variant", variant), ("base_model", base)):
+            for proto, period in (("pub", "published"), ("pub", "post"), ("refit", "recent")):
+                sub = ic_all[(ic_all.protocol == proto) & (ic_all.model == m) & (ic_all.seed != audit.ENSEMBLE)]
+                if sub.empty:
+                    continue
+                g = audit.in_period(sub, period).groupby("seed")
+                row[f"{name}_{period}"] = float(g["rank_ic"].mean().mean())
+                row[f"{name}_{period}_ic"] = float(g["ic"].mean().mean())
+                row[f"{name}_{period}_seeds"] = int(g.ngroups)
+                if proto == "pub" and period == "post":
+                    row[f"{name}_post_by_seed"] = {int(k): float(v) for k, v in g["rank_ic"].mean().items()}
+        for proto, period in (("pub", "post"), ("refit", "recent")):
+            a = ens_daily(ic_all, proto, variant, period)["rank_ic"]
+            b = ens_daily(ic_all, proto, base, period)["rank_ic"]
+            j = pd.concat([a, b], axis=1, join="inner").dropna().to_numpy()
+            if len(j):
+                d, se, p = audit.paired_test(j[:, 0], j[:, 1])
+                row[f"diff_{period}"] = {"diff": d, "se": se, "p": p}
+        out[variant] = row
+    return out
+
+
+def label_split(ic: pd.DataFrame) -> dict:
+    """Share of published-window Rank IC kept after July 2020, by label normalisation."""
+    d = decay(ic)["models"]
+    kept = {m: d[m]["post"] / d[m]["published"] for m in d}
+    rank = {m: v for m, v in kept.items() if m in RANK_LABEL}
+    z = {m: v for m, v in kept.items() if m not in RANK_LABEL}
+    return {"kept": kept, "rank_models": sorted(rank), "z_models": sorted(z)}
+
+
+def predictions(ic_all: pd.DataFrame, ab: dict, split: dict) -> dict:
+    """Check the four predictions in notes/prediction-2026-11-15.md."""
+    kept = split["kept"]
+    z_max = max(kept[m] for m in split["z_models"])
+    out = {}
+    p1 = [m for m in ("alstm", "lstm") if m in kept]
+    out["p1"] = {
+        "held": bool(p1) and all(kept[m] >= 0.40 and kept[m] > z_max for m in p1),
+        "detail": {m: kept[m] for m in p1},
+        "checked": p1,
+    }
+    lr = ab.get("lightgbm_rank", {}).get("variant_post_by_seed", {})
+    later = {s: v for s, v in lr.items() if s in (1, 2, 3, 4)}
+    out["p2"] = {"held": len(later) == 4 and all(v > 0.02 for v in later.values()), "detail": later}
+    p3 = {}
+    for v in ("xgboost_rank", "catboost_rank", "mlp_rank"):
+        if v in ab and "variant_post" in ab[v]:
+            p3[v] = ab[v]["variant_post"] > ab[v]["base_model_post"]
+    out["p3"] = {"held": len(p3) == 3 and all(p3.values()), "detail": p3}
+    lz = ab.get("linear_z", {})
+    out["p4"] = {
+        "held": "variant_post" in lz and lz["variant_post"] < lz["base_model_post"],
+        "detail": {k: lz.get(k) for k in ("variant_post", "base_model_post")},
+    }
+    out["n_held"] = int(sum(out[k]["held"] for k in ("p1", "p2", "p3", "p4")))
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--refresh", action="store_true", help="recompute daily ICs")
     args = ap.parse_args()
     cache = RES / "daily_ic.parquet"
     if args.refresh or not cache.exists():
-        ic = audit.collect_daily_ic(cache=cache)
+        ic_all = audit.collect_daily_ic(cache=cache)
     else:
-        ic = pd.read_parquet(cache)
+        ic_all = pd.read_parquet(cache)
+    ic = ic_all[ic_all.model.isin(ORDER)]
     pub = published_table()
     out = {
         "reproduction": reproduction(ic, pub),
@@ -216,6 +299,8 @@ def main() -> None:
         "tests": tests(ic),
         "rank_stability": rank_stability(ic, pub),
         "yearly": yearly(ic),
+        "ablation": ablation(ic_all),
+        "label_split": label_split(ic),
         "runs": {
             p: {
                 m: int(ic[(ic.protocol == p) & (ic.model == m) & (ic.seed != audit.ENSEMBLE)].seed.nunique())
@@ -224,6 +309,7 @@ def main() -> None:
             for p in sorted(ic.protocol.unique())
         },
     }
+    out["predictions"] = predictions(ic_all, out["ablation"], out["label_split"])
     (RES / "ic_audit.json").write_text(json.dumps(out, indent=1))
     print(json.dumps({k: out[k] for k in ("decay", "rank_stability", "seed_noise", "runs")}, indent=1)[:6000])
 

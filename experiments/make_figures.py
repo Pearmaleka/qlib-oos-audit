@@ -73,21 +73,33 @@ def shade_published(ax) -> None:
     ax.axvspan(pd.Timestamp("2017-01-01"), PUB_END, color="#f0efec", zorder=0, lw=0)
 
 
+RANK_LABEL = {"linear", "gru", "lstm", "alstm", "transformer", "localformer", "tcn"}
+
+
+def _group_lines(ax, frame: pd.DataFrame, models: list[str]) -> None:
+    """Thin line per model and a thick group mean, coloured by label normalisation."""
+    groups = [
+        ([m for m in models if m in RANK_LABEL], BLUE, "Ranked label"),
+        ([m for m in models if m not in RANK_LABEL], ORANGE, "Z-scored label"),
+    ]
+    for ms, color, name in groups:
+        if not ms:
+            continue
+        for m in ms:
+            ax.plot(frame.index, frame[m], color=color, lw=0.8, alpha=0.35, zorder=2)
+        names = ", ".join(LABEL[m] for m in ms)
+        ax.plot(frame.index, frame[ms].mean(axis=1), color=color, lw=2.2, zorder=4, label=f"{name}: {names}")
+
+
 def fig_rolling(ic: pd.DataFrame, models: list[str]) -> None:
     """Centred 250-day mean of daily Rank IC, every model, published protocol."""
     sub = ic[(ic.protocol == "pub") & (ic.seed == audit.ENSEMBLE)]
     w = sub.pivot(index="datetime", columns="model", values="rank_ic").sort_index()
     w.index = pd.to_datetime(w.index)
     roll = w[models].rolling(250, min_periods=125, center=True).mean()
-    fig, ax = plt.subplots(figsize=(6.6, 2.7))
+    fig, ax = plt.subplots(figsize=(6.6, 2.9))
     shade_published(ax)
-    for m in models:
-        if m != "linear":
-            ax.plot(roll.index, roll[m], color=CONTEXT, lw=0.9, zorder=2)
-    mean = roll.mean(axis=1)
-    ax.plot(roll.index, mean, color=BLUE, lw=2, zorder=4, label="Mean of all models")
-    ax.plot(roll.index, roll["linear"], color=ORANGE, lw=2, zorder=5, label="Linear (OLS)")
-    ax.plot([], [], color=CONTEXT, lw=0.9, label="Each other model")
+    _group_lines(ax, roll, models)
     ax.axhline(0, color=AXIS, lw=0.8, zorder=1)
     ax.set_ylabel("Rank IC, centred 250-day mean")
     tr = ax.get_xaxis_transform()
@@ -95,7 +107,7 @@ def fig_rolling(ic: pd.DataFrame, models: list[str]) -> None:
         pd.Timestamp("2018-10-15"), 0.05, "published test window", ha="center", color=INK2, fontsize=7.5, transform=tr
     )
     ax.text(pd.Timestamp("2020-09-15"), 0.05, "after the window", ha="left", color=INK2, fontsize=7.5, transform=tr)
-    ax.legend(loc="upper right", fontsize=7.5, ncol=3, bbox_to_anchor=(1.0, 1.18))
+    ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.0), fontsize=7, ncol=1)
     ax.set_xlim(roll.dropna(how="all").index[0], roll.index[-1])
     save(fig, "rolling_rank_ic")
 
@@ -141,7 +153,7 @@ def fig_dumbbell(audit_json: dict, models: list[str]) -> None:
         label="Published table",
     )
     ax.axvline(0, color=AXIS, lw=0.8)
-    ax.set_yticks(y, [LABEL.get(m, m) for m in order], color=INK)
+    ax.set_yticks(y, [LABEL.get(m, m) + (" (r)" if m in RANK_LABEL else "") for m in order], color=INK)
     ax.set_xlabel("Mean daily Rank IC (CSI 300)")
     ax.grid(axis="y", visible=False)
     ax.legend(loc="lower center", bbox_to_anchor=(0.45, 1.0), fontsize=7, ncol=2)
@@ -170,7 +182,10 @@ def fig_seeds(ic: pd.DataFrame, audit_json: dict, models: list[str]) -> None:
             xb = len(ms) + 0.2
             ax.errorbar(xb, mid, yerr=half, fmt="none", ecolor=INK2, lw=1.2, capsize=4, zorder=3)
             ax.text(xb, mid - half, "±1.96 s.e.\nof one\nwindow\nmean", ha="center", va="top", fontsize=6.5, color=INK2)
-            ax.set_ylim(mid - half * 1.9, mid + half * 1.15)
+            lo = min(runs.rank_ic.min(), mid - half)
+            hi = max(runs.rank_ic.max(), mid + half)
+            pad = 0.08 * (hi - lo)
+            ax.set_ylim(lo - pad - 0.9 * half, hi + pad)
             ax.set_xlim(-0.6, len(ms) + 0.8)
         ax.set_xticks(range(len(ms)), [LABEL.get(m, m) for m in ms], rotation=45, ha="right", color=INK)
         ax.set_title(title, loc="left")
@@ -229,18 +244,16 @@ def fig_cumulative(models: list[str]) -> None:
         return
     cum = ex[list(cols.values())].fillna(0).cumsum()
     cum.columns = list(cols)
-    fig, ax = plt.subplots(figsize=(6.6, 2.6))
+    fig, ax = plt.subplots(figsize=(6.6, 2.9))
     shade_published(ax)
-    for m in cum.columns:
-        if m != "linear":
-            ax.plot(cum.index, cum[m], color=CONTEXT, lw=0.9, zorder=2)
-    ax.plot(cum.index, cum.mean(axis=1), color=BLUE, lw=2, zorder=4, label="Mean of all models")
-    if "linear" in cum:
-        ax.plot(cum.index, cum["linear"], color=ORANGE, lw=2, zorder=5, label="Linear (OLS)")
-    ax.plot([], [], color=CONTEXT, lw=0.9, label="Each other model")
+    _group_lines(ax, cum, list(cols))
+    nulls = [c for c in ex.columns if c.startswith("null/random/seed")]
+    if nulls:
+        null = ex[nulls].fillna(0).cumsum().mean(axis=1)
+        ax.plot(null.index, null, color=INK2, lw=1.4, ls="--", zorder=3, label="Random scores (mean of 5 seeds)")
     ax.axhline(0, color=AXIS, lw=0.8)
     ax.set_ylabel("Cumulative excess return\nover CSI 300, after costs")
-    ax.legend(loc="upper left", fontsize=7.5)
+    ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.0), fontsize=7, ncol=1)
     ax.set_xlim(cum.index[0], cum.index[-1])
     save(fig, "cumulative_excess")
 

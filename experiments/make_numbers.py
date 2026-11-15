@@ -56,6 +56,17 @@ def f4(x: float) -> str:
     return f"{x:.4f}"
 
 
+def pval(x: float) -> str:
+    """A p-value for a table cell (text mode)."""
+    return "$<$0.001" if x < 0.001 else f"{x:.3f}"
+
+
+def prel(x: float, digits: int = 3) -> str:
+    """``p<...`` or ``p=...`` for use inside math mode."""
+    floor = 10.0**-digits
+    return f"p<{floor:.{digits}f}" if x < floor else f"p={x:.{digits}f}"
+
+
 def pct(x: float, digits: int = 0) -> str:
     return f"{x:.{digits}f}\\%"
 
@@ -80,6 +91,11 @@ def main() -> None:
     n.add("NModels", str(len(rep)))
     n.add("NRunsPub", str(sum(runs["pub"].values())))
     n.add("NRunsAll", str(sum(sum(v.values()) for v in runs.values())))
+    ab_runs = sum(
+        r.get("variant_published_seeds", 0) + (1 if "variant_recent" in r else 0) * r.get("variant_recent_seeds", 0)
+        for r in ic.get("ablation", {}).values()
+    )
+    n.add("NRunsAblation", str(ab_runs))
     gaps = [abs(rep[m]["ours_rank_ic"] - rep[m]["pub_rank_ic"]) for m in rep if "pub_rank_ic" in rep[m]]
     n.add("ReproMaxGap", f4(max(gaps)))
     n.add("ReproMeanGap", f4(float(np.mean(gaps))))
@@ -88,6 +104,9 @@ def main() -> None:
     n.add("ReproTauP", f3(tau["p"]))
 
     # ---- decay
+    n.add("OverFactor", f"{ic['decay']['mean_published'] / ic['decay']['mean_post']:.1f}")
+    table_ric = [rep[m]["pub_rank_ic"] for m in rep if "pub_rank_ic" in rep[m]]
+    n.add("PubTableGap", f4(max(table_ric) - min(table_ric)))
     n.add("MeanRankICPub", f4(ic["decay"]["mean_published"]))
     n.add("MeanRankICPost", f4(ic["decay"]["mean_post"]))
     n.add("MeanDecayPct", pct(-ic["decay"]["mean_change_pct"]))
@@ -116,13 +135,21 @@ def main() -> None:
         best = max(refits, key=refits.get)
         n.add("BestRecentModel", NAME[best])
         n.add("BestRecentRankIC", f4(refits[best]))
+    share = {m: st[m]["refit"] / dec[m]["published"] for m in st if "refit" in st[m] and m in dec}
+    if share:
+        n.add("RefitShareMin", pct(100 * min(share.values())))
+        n.add("RefitShareMax", pct(100 * max(share.values())))
+        both = [m for m in st if "refit" in st[m] and "pub" in st[m]]
+        n.add("MeanRecentStale", f4(float(np.mean([st[m]["pub"] for m in both]))))
+        n.add("MeanRecentRefit", f4(float(np.mean([st[m]["refit"] for m in both]))))
+        n.add("MeanPubOfRefitted", f4(float(np.mean([dec[m]["published"] for m in both]))))
     for m in st:
         k = macro_name(NAME[m])
         for proto in ("pub", "refit", "roll"):
             if proto in st[m]:
                 n.add(f"Recent{macro_name(proto)}{k}", f4(st[m][proto]))
         if "refit_minus_pub" in st[m]:
-            n.add(f"RefitGainP{k}", f3(st[m]["refit_minus_pub"]["p"]))
+            n.add(f"RefitGainP{k}", prel(st[m]["refit_minus_pub"]["p"]))
 
     # ---- statistical tests
     for key, tag in [("pub/published", "Pub"), ("pub/post", "Post"), ("refit/recent", "Recent")]:
@@ -140,7 +167,7 @@ def main() -> None:
         n.add(f"MedianSE{tag}", f4(float(np.median(se))))
         for b in ("lightgbm", "linear"):
             if f"spa_vs_{b}" in t:
-                n.add(f"SPA{macro_name(b)}{tag}", f"{t[f'spa_vs_{b}']['consistent']:.2f}")
+                n.add(f"SPA{macro_name(NAME[b])}{tag}", prel(t[f"spa_vs_{b}"]["consistent"], 2))
     for key, tag in [("pub/published", "Pub"), ("pub/post", "Post"), ("refit/recent", "Recent")]:
         s = ic["seed_noise"].get(key)
         if s:
@@ -157,6 +184,50 @@ def main() -> None:
         if k in rs:
             n.add(f"Tau{tag}", f"{rs[k]['tau']:.2f}")
             n.add(f"TauP{tag}", f"{rs[k]['p']:.2f}")
+
+    # ---- label normalisation and ablations
+    ls = ic.get("label_split")
+    if ls:
+        kr = [ls["kept"][m] for m in ls["rank_models"]]
+        kz = [ls["kept"][m] for m in ls["z_models"]]
+        n.add("KeptRankMin", pct(100 * min(kr)))
+        n.add("KeptRankMax", pct(100 * max(kr)))
+        n.add("KeptZMin", pct(100 * min(kz)))
+        n.add("KeptZMax", pct(100 * max(kz)))
+        n.add("NRankModels", str(len(kr)))
+        n.add("NZModels", str(len(kz)))
+    ab = ic.get("ablation", {})
+    stems = {
+        "lightgbm_rank": "LGBRank",
+        "xgboost_rank": "XGBRank",
+        "catboost_rank": "CatRank",
+        "doubleensemble_rank": "DERank",
+        "mlp_rank": "MLPRank",
+        "linear_z": "LinearZ",
+        "lightgbm_f20": "LGBTwenty",
+    }
+    for v, r in ab.items():
+        k = stems[v]
+        for key, tag in (("variant_post", "Post"), ("variant_published", "Pub"), ("variant_recent", "Recent")):
+            if key in r:
+                n.add(f"Abl{k}{tag}", f4(r[key]))
+        if "variant_post_ic" in r:
+            n.add(f"Abl{k}PostIC", f4(r["variant_post_ic"]))
+        for key, tag in (("base_model_post", "Post"), ("base_model_published", "Pub"), ("base_model_recent", "Recent")):
+            if key in r:
+                n.add(f"AblBase{k}{tag}", f4(r[key]))
+        if "base_model_post_ic" in r:
+            n.add(f"AblBase{k}PostIC", f4(r["base_model_post_ic"]))
+        if "variant_post" in r and "base_model_post" in r:
+            n.add(f"Abl{k}Ratio", f"{r['variant_post'] / r['base_model_post']:.1f}")
+            n.add(f"Abl{k}Gain", f4(r["variant_post"] - r["base_model_post"]))
+        if "diff_post" in r:
+            n.add(f"Abl{k}P", prel(r["diff_post"]["p"]))
+    pr = ic.get("predictions")
+    if pr:
+        n.add("PredHeld", {0: "none", 1: "one", 2: "two", 3: "three", 4: "all four"}[pr["n_held"]])
+        for i in range(1, 5):
+            n.add(f"Pred{['One', 'Two', 'Three', 'Four'][i - 1]}", "held" if pr[f"p{i}"]["held"] else "failed")
 
     # ---- features
     sm = fe["strong_mean_aligned"]
@@ -175,18 +246,21 @@ def main() -> None:
     if bt:
         ens = bt["ensembles"]
         for m, per in ens.get("pub", {}).items():
-            k = macro_name(NAME.get(m, m))
+            if m not in ORDER:
+                continue
+            k = macro_name(NAME[m])
             for period, tag in [("published", "Pub"), ("post", "Post")]:
                 if period in per:
                     n.add(f"Ret{tag}{k}", pct(100 * per[period]["annual_excess"], 1))
                     n.add(f"IR{tag}{k}", f"{per[period]['information_ratio']:.2f}")
         for m, per in ens.get("refit", {}).items():
-            if "recent" in per:
-                k = macro_name(NAME.get(m, m))
+            if "recent" in per and m in ORDER:
+                k = macro_name(NAME[m])
                 n.add(f"RetRecent{k}", pct(100 * per["recent"]["annual_excess"], 1))
                 n.add(f"IRRecent{k}", f"{per['recent']['information_ratio']:.2f}")
-        pubs = [per["published"]["annual_excess"] for per in ens.get("pub", {}).values() if "published" in per]
-        posts = [per["post"]["annual_excess"] for per in ens.get("pub", {}).values() if "post" in per]
+        main_pub = {m: per for m, per in ens.get("pub", {}).items() if m in ORDER}
+        pubs = [per["published"]["annual_excess"] for per in main_pub.values() if "published" in per]
+        posts = [per["post"]["annual_excess"] for per in main_pub.values() if "post" in per]
         if pubs and posts:
             n.add("MeanRetPub", pct(100 * float(np.mean(pubs)), 1))
             n.add("MeanRetPost", pct(100 * float(np.mean(posts)), 1))
@@ -202,6 +276,39 @@ def main() -> None:
             n.add("AboveNullPub", pct(100 * above_pub, 1))
             n.add("AboveNullPost", pct(100 * above_post, 1))
             n.add("AboveNullDrop", pct(100 * (1 - above_post / above_pub)))
+        for v, stem in (
+            ("lightgbm_rank", "LGBRank"),
+            ("xgboost_rank", "XGBRank"),
+            ("catboost_rank", "CatRank"),
+            ("doubleensemble_rank", "DERank"),
+            ("mlp_rank", "MLPRank"),
+            ("linear_z", "LinearZ"),
+        ):
+            per = ens.get("pub", {}).get(v, {})
+            if "post" in per:
+                n.add(f"Ret{stem}Post", pct(100 * per["post"]["annual_excess"], 1))
+            per = ens.get("refit", {}).get(v, {})
+            if "recent" in per:
+                n.add(f"Ret{stem}Recent", pct(100 * per["recent"]["annual_excess"], 1))
+        better_post = []
+        better_recent = []
+        for v, base in (
+            ("lightgbm_rank", "lightgbm"),
+            ("xgboost_rank", "xgboost"),
+            ("catboost_rank", "catboost"),
+            ("doubleensemble_rank", "doubleensemble"),
+            ("mlp_rank", "mlp"),
+        ):
+            a, b = ens.get("pub", {}).get(v, {}).get("post"), ens.get("pub", {}).get(base, {}).get("post")
+            if a and b:
+                better_post.append(a["annual_excess"] > b["annual_excess"])
+            a, b = ens.get("refit", {}).get(v, {}).get("recent"), ens.get("refit", {}).get(base, {}).get("recent")
+            if a and b:
+                better_recent.append(a["annual_excess"] > b["annual_excess"])
+        if better_post:
+            n.add("RankBetterRetPost", str(sum(better_post)))
+            n.add("RankBetterRetRecent", str(sum(better_recent)))
+            n.add("RankBetterRetOf", str(len(better_post)))
         d = bt.get("deflated_sharpe_post", {})
         if d:
             best_model, best_tag = d["best"].split("/")
@@ -271,6 +378,63 @@ def write_tables(ic: dict, bt: dict) -> None:
             f"{t['pairs_p05']}/{t['pairs']} & {t['pairs_holm']} & {spa_l:.2f} & {spa_o:.2f} & {icc} \\\\"
         )
     (tdir / "tests.tex").write_text("\n".join(rows) + "\n\\bottomrule\n")
+
+    # Appendix: mean daily Rank IC by calendar year, published protocol, seed ensembles.
+    yr = ic["yearly"].get("pub", {})
+    models = ordered(yr)
+    years = sorted({int(y) for m in models for y in yr[m]})
+    head = " & ".join(["Year"] + [NAME[m] for m in models]) + " \\\\"
+    rows = ["\\begin{tabular}{l" + "r" * len(models) + "}", "\\toprule", head, "\\midrule"]
+    for y in years:
+        cells = [f"{yr[m].get(str(y), float('nan')):.3f}" for m in models]
+        rows.append(" & ".join([str(y)] + cells) + " \\\\")
+    (tdir / "yearly.tex").write_text("\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n")
+
+    # Ablation table: official config vs one processor change, grouped by base model.
+    ab = ic.get("ablation", {})
+    if ab:
+        label = {
+            "linear": "Linear (official: ranked label)",
+            "linear_z": "z-scored label",
+            "lightgbm": "LightGBM (official: z-scored label)",
+            "lightgbm_rank": "ranked label",
+            "lightgbm_f20": "20 recurrent-model features",
+            "xgboost": "XGBoost (official: z-scored label)",
+            "xgboost_rank": "ranked label",
+            "catboost": "CatBoost (official: z-scored label)",
+            "catboost_rank": "ranked label",
+            "doubleensemble": "DoubleEnsemble (official: z-scored)",
+            "doubleensemble_rank": "ranked label",
+            "mlp": "MLP (official: z-scored label)",
+            "mlp_rank": "ranked label",
+        }
+
+        def row(name: str, pub: float, post: float, rec, p_s: str) -> str:
+            rec_s = f"{rec:.4f}" if rec is not None else "--"
+            return f"{name} & {pub:.4f} & {post:.4f} & {100 * (post / pub - 1):+.0f}\\% & {rec_s} & {p_s} \\\\"
+
+        rows = []
+        for base in ["lightgbm", "xgboost", "catboost", "doubleensemble", "mlp", "linear"]:
+            vs = [v for v, r in ab.items() if r["base"] == base]
+            if not vs:
+                continue
+            r0 = ab[vs[0]]
+            rows.append(
+                row(
+                    label[base],
+                    r0["base_model_published"],
+                    r0["base_model_post"],
+                    r0.get("base_model_recent"),
+                    "\\multicolumn{1}{c}{--}",
+                )
+            )
+            for v in vs:
+                r = ab[v]
+                p_s = pval(r["diff_post"]["p"]) if "diff_post" in r else "--"
+                rows.append(
+                    row(f"\\quad {label[v]}", r["variant_published"], r["variant_post"], r.get("variant_recent"), p_s)
+                )
+        (tdir / "ablation.tex").write_text("\n".join(rows) + "\n\\bottomrule\n")
 
     # Table 4: portfolios.
     if bt:
