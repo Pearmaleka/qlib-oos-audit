@@ -1,0 +1,882 @@
+{
+ "reproduction": {
+  "alstm": {
+   "ours_annual_excess": 0.04951446439593838,
+   "ours_information_ratio": 0.7582755085652826,
+   "ours_max_drawdown": -0.09931471684639397,
+   "ours_annual_excess_sd": 0.014302943172693159,
+   "ours_information_ratio_sd": 0.21024745267799244,
+   "pub_annual_excess": 0.047,
+   "pub_information_ratio": 0.6992,
+   "pub_max_drawdown": -0.1072
+  },
+  "catboost": {
+   "ours_annual_excess": 0.09339482199343889,
+   "ours_information_ratio": 1.0054407884665344,
+   "ours_max_drawdown": -0.09103565378078894,
+   "ours_annual_excess_sd": 0.01623638653321286,
+   "ours_information_ratio_sd": 0.16697885432902623,
+   "pub_annual_excess": 0.0765,
+   "pub_information_ratio": 0.8032,
+   "pub_max_drawdown": -0.1092
+  },
+  "doubleensemble": {
+   "ours_annual_excess": 0.11164708689372929,
+   "ours_information_ratio": 1.2845697595769299,
+   "ours_max_drawdown": -0.0939905111105116,
+   "ours_annual_excess_sd": 0.013130236105898802,
+   "ours_information_ratio_sd": 0.14260162135625043,
+   "pub_annual_excess": 0.1158,
+   "pub_information_ratio": 1.3432,
+   "pub_max_drawdown": -0.092
+  },
+  "gru": {
+   "ours_annual_excess": 0.03446235315392101,
+   "ours_information_ratio": 0.487215879999358,
+   "ours_max_drawdown": -0.11420831166251738,
+   "ours_annual_excess_sd": 0.004583736375461265,
+   "ours_information_ratio_sd": 0.04249483808742591,
+   "pub_annual_excess": 0.0344,
+   "pub_information_ratio": 0.516,
+   "pub_max_drawdown": -0.1017
+  },
+  "lightgbm": {
+   "ours_annual_excess": 0.11060674222212444,
+   "ours_information_ratio": 1.2470710842611958,
+   "ours_max_drawdown": -0.08796813502465808,
+   "ours_annual_excess_sd": 0.023007976702039534,
+   "ours_information_ratio_sd": 0.27350762607362616,
+   "pub_annual_excess": 0.0901,
+   "pub_information_ratio": 1.0164,
+   "pub_max_drawdown": -0.1038
+  },
+  "lstm": {
+   "ours_annual_excess": 0.022330096910977024,
+   "ours_information_ratio": 0.34359751261844945,
+   "ours_max_drawdown": -0.11391687822006295,
+   "ours_annual_excess_sd": 0.02901464918028841,
+   "ours_information_ratio_sd": 0.44956888716590415,
+   "pub_annual_excess": 0.0381,
+   "pub_information_ratio": 0.5561,
+   "pub_max_drawdown": -0.1207
+  },
+  "mlp": {
+   "ours_annual_excess": 0.07199009652091512,
+   "ours_information_ratio": 0.9388051060647115,
+   "ours_max_drawdown": -0.09267494242514589,
+   "ours_annual_excess_sd": 0.012303547613335965,
+   "ours_information_ratio_sd": 0.14997075409971453,
+   "pub_annual_excess": 0.0895,
+   "pub_information_ratio": 1.1408,
+   "pub_max_drawdown": -0.1103
+  },
+  "xgboost": {
+   "ours_annual_excess": 0.10916384971629431,
+   "ours_information_ratio": 1.2109954169158992,
+   "ours_max_drawdown": -0.09110505410739383,
+   "ours_annual_excess_sd": 0.014301600065307186,
+   "ours_information_ratio_sd": 0.13778322591022427,
+   "pub_annual_excess": 0.078,
+   "pub_information_ratio": 0.907,
+   "pub_max_drawdown": -0.1168
+  },
+  "catboost_rank": {
+   "ours_annual_excess": 0.10959105198868216,
+   "ours_information_ratio": 1.5067124682969035,
+   "ours_max_drawdown": -0.054428193387926954
+  },
+  "doubleensemble_rank": {
+   "ours_annual_excess": 0.05743938054210018,
+   "ours_information_ratio": 0.7962659524524324,
+   "ours_max_drawdown": -0.08286366712418636
+  },
+  "lightgbm_f20": {
+   "ours_annual_excess": 0.07039845068749635,
+   "ours_information_ratio": 0.7532825830219584,
+   "ours_max_drawdown": -0.13175198545345856
+  },
+  "lightgbm_rank": {
+   "ours_annual_excess": 0.0878286362150128,
+   "ours_information_ratio": 1.229079203976818,
+   "ours_max_drawdown": -0.0960588611485694
+  },
+  "linear": {
+   "ours_annual_excess": 0.09898397671024108,
+   "ours_information_ratio": 1.3064561806703192,
+   "ours_max_drawdown": -0.13738621972841975,
+   "pub_annual_excess": 0.0692,
+   "pub_information_ratio": 0.9209,
+   "pub_max_drawdown": -0.1509
+  },
+  "linear_z": {
+   "ours_annual_excess": 0.07332324738223575,
+   "ours_information_ratio": 0.8555505499968963,
+   "ours_max_drawdown": -0.1526421983699987
+  },
+  "mlp_rank": {
+   "ours_annual_excess": 0.03672841841008842,
+   "ours_information_ratio": 0.5264048217352785,
+   "ours_max_drawdown": -0.09676541772842685
+  },
+  "xgboost_rank": {
+   "ours_annual_excess": 0.09968147158497838,
+   "ours_information_ratio": 1.3916069985895887,
+   "ours_max_drawdown": -0.09731994731092833
+  }
+ },
+ "ensembles": {
+  "pub": {
+   "alstm": {
+    "published": {
+     "annual_excess": 0.05787424131623656,
+     "information_ratio": 0.9237166126242111,
+     "max_drawdown": -0.09773926041446786,
+     "turnover": 0.18097294986413737,
+     "psr0": 0.9609973713122403,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.042959677694818905
+    },
+    "post": {
+     "annual_excess": 0.05847597545086927,
+     "information_ratio": 0.7409005090145192,
+     "max_drawdown": -0.13022717822611293,
+     "turnover": 0.19747675653490607,
+     "psr0": 0.9697674508473104,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04702115248391818
+    },
+    "recent": {
+     "annual_excess": 0.07758167441147043,
+     "information_ratio": 0.9694472812425827,
+     "max_drawdown": -0.13022717822611313,
+     "turnover": 0.1965959181904795,
+     "psr0": 0.9725307678899149,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04681300959942062
+    }
+   },
+   "catboost": {
+    "published": {
+     "annual_excess": 0.08850132730171743,
+     "information_ratio": 0.9535550839559632,
+     "max_drawdown": -0.08546099305170682,
+     "turnover": 0.14636465831210793,
+     "psr0": 0.9663657546538246,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.03471985757509772
+    },
+    "post": {
+     "annual_excess": 0.046482580143739266,
+     "information_ratio": 0.4023380896210859,
+     "max_drawdown": -0.18015179199681877,
+     "turnover": 0.1577957761165633,
+     "psr0": 0.8460792407583555,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.0375759456407228
+    },
+    "recent": {
+     "annual_excess": 0.01285530811263075,
+     "information_ratio": 0.10672879094795507,
+     "max_drawdown": -0.1801517919968187,
+     "turnover": 0.15687874188954923,
+     "psr0": 0.5837977697796444,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.03735778218583577
+    }
+   },
+   "catboost_rank": {
+    "published": {
+     "annual_excess": 0.10959105198868216,
+     "information_ratio": 1.5067124682969035,
+     "max_drawdown": -0.054428193387926954,
+     "turnover": 0.16348691121382333,
+     "psr0": 0.9981521722365191,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.038794481681829654
+    },
+    "post": {
+     "annual_excess": 0.08650011773692932,
+     "information_ratio": 1.0205646251712883,
+     "max_drawdown": -0.10265394640303799,
+     "turnover": 0.19717712898224507,
+     "psr0": 0.9956068645564826,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.0469529378747216
+    },
+    "recent": {
+     "annual_excess": 0.07170054345594455,
+     "information_ratio": 0.8428330162984196,
+     "max_drawdown": -0.1026539464030381,
+     "turnover": 0.19668132489993645,
+     "psr0": 0.9553221729415008,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.046835095614908416
+    }
+   },
+   "doubleensemble": {
+    "published": {
+     "annual_excess": 0.11492257738503137,
+     "information_ratio": 1.3341222426788335,
+     "max_drawdown": -0.09703374099076606,
+     "turnover": 0.1520239947281812,
+     "psr0": 0.9943298558843464,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.03607096066864275
+    },
+    "post": {
+     "annual_excess": 0.05079665529485077,
+     "information_ratio": 0.505914841592921,
+     "max_drawdown": -0.15244747389942487,
+     "turnover": 0.15663236187260132,
+     "psr0": 0.9006595818170264,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.03729793823275015
+    },
+    "recent": {
+     "annual_excess": 0.013560652807496843,
+     "information_ratio": 0.13127354814900832,
+     "max_drawdown": -0.15244747389942487,
+     "turnover": 0.15525864169024495,
+     "psr0": 0.6027505754334849,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.03697336514148048
+    }
+   },
+   "doubleensemble_rank": {
+    "published": {
+     "annual_excess": 0.05743938054210018,
+     "information_ratio": 0.7962659524524324,
+     "max_drawdown": -0.08286366712418636,
+     "turnover": 0.15207573384748196,
+     "psr0": 0.9357286727716709,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.03607682454452432
+    },
+    "post": {
+     "annual_excess": 0.07475055067933875,
+     "information_ratio": 0.8987739568211335,
+     "max_drawdown": -0.11784453772005987,
+     "turnover": 0.19714088074539543,
+     "psr0": 0.989178621161413,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04694329598148459
+    },
+    "recent": {
+     "annual_excess": 0.03382576079308512,
+     "information_ratio": 0.40935703578543453,
+     "max_drawdown": -0.11784453772006011,
+     "turnover": 0.19672268226907486,
+     "psr0": 0.792844646810005,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04684368632585925
+    }
+   },
+   "gru": {
+    "published": {
+     "annual_excess": 0.04957559959369129,
+     "information_ratio": 0.6982122872441099,
+     "max_drawdown": -0.11787348253817966,
+     "turnover": 0.18392542847985677,
+     "psr0": 0.9100889364815783,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.043660655520723825
+    },
+    "post": {
+     "annual_excess": 0.06948172260932498,
+     "information_ratio": 0.8601313052536167,
+     "max_drawdown": -0.1407311758220388,
+     "turnover": 0.19667555073879117,
+     "psr0": 0.9853137714465007,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.046832659360551664
+    },
+    "recent": {
+     "annual_excess": 0.05556764411264821,
+     "information_ratio": 0.7098940099279388,
+     "max_drawdown": -0.14073117582203915,
+     "turnover": 0.1950607774414444,
+     "psr0": 0.9198256497357538,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.046448461341742395
+    }
+   },
+   "lightgbm": {
+    "published": {
+     "annual_excess": 0.12447254615939489,
+     "information_ratio": 1.405707835739818,
+     "max_drawdown": -0.08831870551466448,
+     "turnover": 0.15308404717275742,
+     "psr0": 0.9960463462887968,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.036321269743954374
+    },
+    "post": {
+     "annual_excess": 0.021929936758533844,
+     "information_ratio": 0.2068255984331621,
+     "max_drawdown": -0.19472403355585,
+     "turnover": 0.15877023800431508,
+     "psr0": 0.6998338063202895,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.037805339087275625
+    },
+    "recent": {
+     "annual_excess": -0.022617986055726343,
+     "information_ratio": -0.2043529550325539,
+     "max_drawdown": -0.19472403355584963,
+     "turnover": 0.15824439670812795,
+     "psr0": 0.3431898387034076,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.03768174025937767
+    }
+   },
+   "lightgbm_f20": {
+    "published": {
+     "annual_excess": 0.07039845068749635,
+     "information_ratio": 0.7532825830219584,
+     "max_drawdown": -0.13175198545345856,
+     "turnover": 0.19582602269558777,
+     "psr0": 0.9243031351676456,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.046495160415448517
+    },
+    "post": {
+     "annual_excess": 0.047110313773188965,
+     "information_ratio": 0.4791228741391032,
+     "max_drawdown": -0.1516825553695811,
+     "turnover": 0.19745930624435593,
+     "psr0": 0.8876603001230488,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04702030080556188
+    },
+    "recent": {
+     "annual_excess": 0.05314433594868902,
+     "information_ratio": 0.5237412125457375,
+     "max_drawdown": -0.15168255536958103,
+     "turnover": 0.1973674172015473,
+     "psr0": 0.8510701640410072,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.046999036803590556
+    }
+   },
+   "lightgbm_rank": {
+    "published": {
+     "annual_excess": 0.0878286362150128,
+     "information_ratio": 1.229079203976818,
+     "max_drawdown": -0.0960588611485694,
+     "turnover": 0.16259031946367553,
+     "psr0": 0.9903393083087163,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.03858068114180566
+    },
+    "post": {
+     "annual_excess": 0.05107574328923839,
+     "information_ratio": 0.6431195491679311,
+     "max_drawdown": -0.13680104338806637,
+     "turnover": 0.19740356582573007,
+     "psr0": 0.9485704514341735,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04700617077315904
+    },
+    "recent": {
+     "annual_excess": 0.01557304611871798,
+     "information_ratio": 0.1985907363563243,
+     "max_drawdown": -0.1368010433880667,
+     "turnover": 0.19670770686541927,
+     "psr0": 0.6532240391381566,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04684066537420165
+    }
+   },
+   "linear": {
+    "published": {
+     "annual_excess": 0.09898397671024108,
+     "information_ratio": 1.3064561806703192,
+     "max_drawdown": -0.13738621972841975,
+     "turnover": 0.17410543827372327,
+     "psr0": 0.9941255517289054,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.04132243690756707
+    },
+    "post": {
+     "annual_excess": 0.057936920481283405,
+     "information_ratio": 0.6914071415857191,
+     "max_drawdown": -0.19029946269559964,
+     "turnover": 0.19603249297143024,
+     "psr0": 0.9604592837306424,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04668105027107415
+    },
+    "recent": {
+     "annual_excess": 0.06307230502742936,
+     "information_ratio": 0.7478587153777327,
+     "max_drawdown": -0.19029946269559983,
+     "turnover": 0.19511577142369937,
+     "psr0": 0.9318580198574352,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.046463608870167684
+    }
+   },
+   "linear_z": {
+    "published": {
+     "annual_excess": 0.07332324738223575,
+     "information_ratio": 0.8555505499968963,
+     "max_drawdown": -0.1526421983699987,
+     "turnover": 0.188291827420384,
+     "psr0": 0.9493236863302298,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.04470413446279766
+    },
+    "post": {
+     "annual_excess": 0.04562010065963458,
+     "information_ratio": 0.46415561147980855,
+     "max_drawdown": -0.23596392152680917,
+     "turnover": 0.19681055948614573,
+     "psr0": 0.8798943796953913,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.046866329788733944
+    },
+    "recent": {
+     "annual_excess": 0.009645482640768978,
+     "information_ratio": 0.09604797686503418,
+     "max_drawdown": -0.23596392152680898,
+     "turnover": 0.19711024909448682,
+     "psr0": 0.5754785400526952,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04694105138046207
+    }
+   },
+   "lstm": {
+    "published": {
+     "annual_excess": 0.03843717306421772,
+     "information_ratio": 0.557893565558754,
+     "max_drawdown": -0.12330519437624529,
+     "turnover": 0.17225791582375485,
+     "psr0": 0.8570110556496062,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.04088418724636765
+    },
+    "post": {
+     "annual_excess": 0.07846735322203303,
+     "information_ratio": 1.0110395396474625,
+     "max_drawdown": -0.11053205670846805,
+     "turnover": 0.19761447104647895,
+     "psr0": 0.9950552247657017,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04705466442270926
+    },
+    "recent": {
+     "annual_excess": 0.07768710064275366,
+     "information_ratio": 1.0081178383094034,
+     "max_drawdown": -0.1105320567084681,
+     "turnover": 0.1967497424951014,
+     "psr0": 0.9776905046665044,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.046850364126511744
+    }
+   },
+   "mlp": {
+    "published": {
+     "annual_excess": 0.05624790626367925,
+     "information_ratio": 0.7321509868146384,
+     "max_drawdown": -0.09311001920438333,
+     "turnover": 0.15257137919619917,
+     "psr0": 0.9194711380053956,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.036194238570994894
+    },
+    "post": {
+     "annual_excess": 0.06682060178453489,
+     "information_ratio": 0.7775450291074589,
+     "max_drawdown": -0.17760356328442806,
+     "turnover": 0.1595988699967396,
+     "psr0": 0.9764888032516262,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.03800383364780354
+    },
+    "recent": {
+     "annual_excess": 0.04883083932565789,
+     "information_ratio": 0.5790963859564272,
+     "max_drawdown": -0.17760356328442797,
+     "turnover": 0.1589014915906916,
+     "psr0": 0.8767782728186568,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.037837596656411614
+    }
+   },
+   "mlp_rank": {
+    "published": {
+     "annual_excess": 0.03672841841008842,
+     "information_ratio": 0.5264048217352785,
+     "max_drawdown": -0.09676541772842685,
+     "turnover": 0.14970139514704375,
+     "psr0": 0.8436322439030925,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.035511214620675406
+    },
+    "post": {
+     "annual_excess": 0.05317089383369868,
+     "information_ratio": 0.6860905856901188,
+     "max_drawdown": -0.13916014917814268,
+     "turnover": 0.1598238758548006,
+     "psr0": 0.959813683991891,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.03805757739907868
+    },
+    "recent": {
+     "annual_excess": 0.05802096862015149,
+     "information_ratio": 0.7594023902111202,
+     "max_drawdown": -0.13916014917814273,
+     "turnover": 0.16005043545706737,
+     "psr0": 0.9359051010916105,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.03811132779681306
+    }
+   },
+   "xgboost": {
+    "published": {
+     "annual_excess": 0.09362896794157967,
+     "information_ratio": 1.0089569744650357,
+     "max_drawdown": -0.09132667911444457,
+     "turnover": 0.17987210416803381,
+     "psr0": 0.973300486468914,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.04270279968470434
+    },
+    "post": {
+     "annual_excess": 0.04183483940528119,
+     "information_ratio": 0.37385283331595487,
+     "max_drawdown": -0.18384284919903215,
+     "turnover": 0.1964321111393751,
+     "psr0": 0.828760470140091,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.046773634645508086
+    },
+    "recent": {
+     "annual_excess": -0.0014873515605498431,
+     "information_ratio": -0.01275362455339203,
+     "max_drawdown": -0.183842849199032,
+     "turnover": 0.19557514203050386,
+     "psr0": 0.48992384032956854,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.046573306438643935
+    }
+   },
+   "xgboost_rank": {
+    "published": {
+     "annual_excess": 0.09968147158497838,
+     "information_ratio": 1.3916069985895887,
+     "max_drawdown": -0.09731994731092833,
+     "turnover": 0.1640892531740291,
+     "psr0": 0.996168810443843,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.038942090785489616
+    },
+    "post": {
+     "annual_excess": 0.0722335851149426,
+     "information_ratio": 0.8878812312599574,
+     "max_drawdown": -0.12326584454994355,
+     "turnover": 0.19522586508064574,
+     "psr0": 0.9885633891559414,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04648655656908984
+    },
+    "recent": {
+     "annual_excess": 0.05062262022934581,
+     "information_ratio": 0.6321839867620255,
+     "max_drawdown": -0.12326584454994369,
+     "turnover": 0.19433092185125855,
+     "psr0": 0.8979401260047222,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04627564644096843
+    }
+   }
+  },
+  "refit": {
+   "alstm": {
+    "recent": {
+     "annual_excess": 0.04160152124289339,
+     "information_ratio": 0.5407402331436401,
+     "max_drawdown": -0.13045601103355325,
+     "turnover": 0.195712002844857,
+     "psr0": 0.8582723881168405,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04647740433777147
+    }
+   },
+   "catboost": {
+    "recent": {
+     "annual_excess": 0.07840800268138198,
+     "information_ratio": 0.7452787180388325,
+     "max_drawdown": -0.13931878917601037,
+     "turnover": 0.1999709679298075,
+     "psr0": 0.9325814019085995,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04749130306335373
+    }
+   },
+   "catboost_rank": {
+    "recent": {
+     "annual_excess": 0.06915410121187393,
+     "information_ratio": 0.6961730558022602,
+     "max_drawdown": -0.17087043176484779,
+     "turnover": 0.19930192740762565,
+     "psr0": 0.9191367878614585,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04733097976754332
+    }
+   },
+   "doubleensemble": {
+    "recent": {
+     "annual_excess": 0.08116682375656802,
+     "information_ratio": 0.9119189894113648,
+     "max_drawdown": -0.12307386712615259,
+     "turnover": 0.1979039842072742,
+     "psr0": 0.9667612022059612,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04699811713941307
+    }
+   },
+   "doubleensemble_rank": {
+    "recent": {
+     "annual_excess": 0.09268767725252863,
+     "information_ratio": 1.0475632060538258,
+     "max_drawdown": -0.1535480873376473,
+     "turnover": 0.1982636175692295,
+     "psr0": 0.9823836550544408,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04708343195524416
+    }
+   },
+   "gru": {
+    "recent": {
+     "annual_excess": -0.00026014943943910825,
+     "information_ratio": -0.003124405216442951,
+     "max_drawdown": -0.2956777161480014,
+     "turnover": 0.19791526212619753,
+     "psr0": 0.4975307799129886,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04700145939578223
+    }
+   },
+   "lightgbm": {
+    "recent": {
+     "annual_excess": 0.0412782124678499,
+     "information_ratio": 0.4292974059788334,
+     "max_drawdown": -0.15073832259404374,
+     "turnover": 0.1982031575715034,
+     "psr0": 0.804099627750983,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.047069196788034534
+    }
+   },
+   "lightgbm_f20": {
+    "recent": {
+     "annual_excess": 0.0010841811876265996,
+     "information_ratio": 0.012298783205946113,
+     "max_drawdown": -0.14645652337952503,
+     "turnover": 0.2014582517777164,
+     "psr0": 0.5097194046373037,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04784441441870774
+    }
+   },
+   "lightgbm_rank": {
+    "recent": {
+     "annual_excess": 0.05121337916176691,
+     "information_ratio": 0.5533429478586666,
+     "max_drawdown": -0.21659587514642725,
+     "turnover": 0.19991234400554606,
+     "psr0": 0.8646874946260494,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04747647108880574
+    }
+   },
+   "linear": {
+    "recent": {
+     "annual_excess": 0.07272428579955256,
+     "information_ratio": 0.8212456680470599,
+     "max_drawdown": -0.23550383673032035,
+     "turnover": 0.19838852341766058,
+     "psr0": 0.9483381870169378,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.047113406087293926
+    }
+   },
+   "linear_z": {
+    "recent": {
+     "annual_excess": 0.06555389736925861,
+     "information_ratio": 0.7717118370836566,
+     "max_drawdown": -0.15622079022776164,
+     "turnover": 0.19746380644900377,
+     "psr0": 0.9390572095671347,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.0468962429131994
+    }
+   },
+   "mlp": {
+    "recent": {
+     "annual_excess": 0.07851921064536252,
+     "information_ratio": 0.9179406746849647,
+     "max_drawdown": -0.13051836820576976,
+     "turnover": 0.18581326230953635,
+     "psr0": 0.9672748653924396,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04411912479062278
+    }
+   },
+   "mlp_rank": {
+    "recent": {
+     "annual_excess": 0.04853853060060622,
+     "information_ratio": 0.521300772403239,
+     "max_drawdown": -0.15629069952665325,
+     "turnover": 0.2000725798211562,
+     "psr0": 0.8511264095063276,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04751420431074337
+    }
+   },
+   "xgboost": {
+    "recent": {
+     "annual_excess": 0.07320717608647377,
+     "information_ratio": 0.7617476662613873,
+     "max_drawdown": -0.13404684687208662,
+     "turnover": 0.1973438936893498,
+     "psr0": 0.9374594570743439,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.046867710148580995
+    }
+   },
+   "xgboost_rank": {
+    "recent": {
+     "annual_excess": 0.05605303563572922,
+     "information_ratio": 0.6305250006606133,
+     "max_drawdown": -0.19187891627618614,
+     "turnover": 0.19803911534556418,
+     "psr0": 0.896106018462911,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.047029504141181504
+    }
+   }
+  },
+  "roll": {
+   "lightgbm": {
+    "published": {
+     "annual_excess": 0.142549540048906,
+     "information_ratio": 1.664587700974978,
+     "max_drawdown": -0.09611039211355363,
+     "turnover": 0.15623954770817594,
+     "psr0": 0.9992919067959132,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.037067198772348736
+    },
+    "post": {
+     "annual_excess": 0.06162983787578752,
+     "information_ratio": 0.6691089034596702,
+     "max_drawdown": -0.14071593706144542,
+     "turnover": 0.1580788448325124,
+     "psr0": 0.9560869801886883,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.037641600441014667
+    },
+    "recent": {
+     "annual_excess": 0.052627441868519316,
+     "information_ratio": 0.6216585832674391,
+     "max_drawdown": -0.1407159370614454,
+     "turnover": 0.155834358266764,
+     "psr0": 0.8938597668839494,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.03710728932363177
+    }
+   },
+   "linear": {
+    "published": {
+     "annual_excess": 0.07517320207648824,
+     "information_ratio": 1.017775777768917,
+     "max_drawdown": -0.11019865798773879,
+     "turnover": 0.17108886350117694,
+     "psr0": 0.9749061929292953,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.04060378432158694
+    },
+    "post": {
+     "annual_excess": 0.07495696410972284,
+     "information_ratio": 0.7840887608339618,
+     "max_drawdown": -0.25604999625839664,
+     "turnover": 0.1974415425277331,
+     "psr0": 0.9765587287350171,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04701457098928831
+    },
+    "recent": {
+     "annual_excess": 0.073716299030292,
+     "information_ratio": 0.7400360037446905,
+     "max_drawdown": -0.2560499962583967,
+     "turnover": 0.19586550329100974,
+     "psr0": 0.9288600598544472,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.046639102674077344
+    }
+   },
+   "xgboost": {
+    "published": {
+     "annual_excess": 0.08964674833558117,
+     "information_ratio": 1.0275339369618852,
+     "max_drawdown": -0.10159710394135416,
+     "turnover": 0.18800060563171836,
+     "psr0": 0.9753001570274661,
+     "bench_annual": 0.11356145143508911,
+     "cost_annual": 0.044635324464857
+    },
+    "post": {
+     "annual_excess": 0.06766999712992486,
+     "information_ratio": 0.7091387962357854,
+     "max_drawdown": -0.11404448515828196,
+     "turnover": 0.19670200532227575,
+     "psr0": 0.9648813363581064,
+     "bench_annual": -0.009038461372256279,
+     "cost_annual": 0.04683679840631627
+    },
+    "recent": {
+     "annual_excess": 0.06586249789772969,
+     "information_ratio": 0.7106364374935285,
+     "max_drawdown": -0.09654357843202357,
+     "turnover": 0.19423557903658512,
+     "psr0": 0.9233932895473996,
+     "bench_annual": 0.023587610572576523,
+     "cost_annual": 0.04625070677914611
+    }
+   }
+  }
+ },
+ "null": {
+  "post": {
+   "annual_excess": -0.008915593564812734,
+   "annual_excess_sd": 0.022874791769327937,
+   "information_ratio": -0.13710977900367977,
+   "information_ratio_sd": 0.33683886285724873,
+   "seeds": 5
+  },
+  "published": {
+   "annual_excess": -0.08768280964892412,
+   "annual_excess_sd": 0.007394514922521365,
+   "information_ratio": -1.2979747394807544,
+   "information_ratio_sd": 0.10921725207407922,
+   "seeds": 5
+  },
+  "recent": {
+   "annual_excess": -0.009388649841489613,
+   "annual_excess_sd": 0.03541324168244831,
+   "information_ratio": -0.14731626233006906,
+   "information_ratio_sd": 0.523819559675952,
+   "seeds": 5
+  }
+ },
+ "deflated_sharpe_post": {
+  "best": "lstm/seed0",
+  "trials": 33,
+  "information_ratio": 0.9002323072871148,
+  "psr0": 0.9888624041581864,
+  "dsr": 0.8753644668425422,
+  "sr0_annualised": 0.44645300638311525
+ }
+}
