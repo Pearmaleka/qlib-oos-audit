@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import argparse
 import copy
+import gc
+import inspect
 import json
 import os
 import time
@@ -79,8 +81,43 @@ CONFIGS = {
     "tcn": "workflow_config_tcn_Alpha158.yaml",
 }
 
+# Exploratory ablations: an official config with one change to its processors.
+# "label" swaps the cross-sectional label normalisation; "features" keeps only
+# the 20 Alpha158 columns the official recurrent-model configs select.
+RNN_FEATURES = [
+    "RESI5",
+    "WVMA5",
+    "RSQR5",
+    "KLEN",
+    "RSQR10",
+    "CORR5",
+    "CORD5",
+    "CORR10",
+    "ROC60",
+    "RESI10",
+    "VSTD5",
+    "RSQR60",
+    "CORR60",
+    "WVMA60",
+    "STD5",
+    "RSQR20",
+    "CORD60",
+    "CORD10",
+    "CORR20",
+    "KLOW",
+]
+VARIANTS: dict[str, tuple[str, dict]] = {
+    "lightgbm_rank": ("lightgbm", {"label": "CSRankNorm"}),
+    "xgboost_rank": ("xgboost", {"label": "CSRankNorm"}),
+    "catboost_rank": ("catboost", {"label": "CSRankNorm"}),
+    "doubleensemble_rank": ("doubleensemble", {"label": "CSRankNorm"}),
+    "mlp_rank": ("mlp", {"label": "CSRankNorm"}),
+    "lightgbm_f20": ("lightgbm", {"features": RNN_FEATURES}),
+    "linear_z": ("linear", {"label": "CSZScoreNorm"}),
+}
+
 # The models whose output does not depend on a seed.
-DETERMINISTIC = {"linear"}
+DETERMINISTIC = {"linear", "linear_z"}
 
 _DEFAULT_LEARN = [
     {"class": "DropnaLabel"},
@@ -95,12 +132,30 @@ _THREAD_KEYS = ("num_threads", "nthread", "thread_count", "n_jobs")
 _REPLACED_PROCESSORS = {"CSZFillna": "oosaudit.processors"}
 
 
+def base_model(model: str) -> str:
+    return VARIANTS[model][0] if model in VARIANTS else model
+
+
 def load_official(model: str) -> dict:
     """Parse an official config the way ``qrun`` does (ruamel, YAML 1.2)."""
     from ruamel.yaml import YAML
 
-    with open(CONFIG_DIR / CONFIGS[model]) as f:
+    with open(CONFIG_DIR / CONFIGS[base_model(model)]) as f:
         return YAML(typ="safe", pure=True).load(f)
+
+
+def _apply_variant(model: str, infer: list, learn: list) -> tuple[list, list]:
+    if model not in VARIANTS:
+        return infer, learn
+    change = VARIANTS[model][1]
+    if "label" in change:
+        learn = [p for p in learn if not (isinstance(p, dict) and p.get("kwargs", {}).get("fields_group") == "label")]
+        learn.append({"class": change["label"], "kwargs": {"fields_group": "label"}})
+    if "features" in change:
+        infer = [
+            {"class": "FilterCol", "kwargs": {"fields_group": "feature", "col_list": list(change["features"])}}
+        ] + infer
+    return infer, learn
 
 
 def _swap_processors(procs: list) -> list:
@@ -158,6 +213,7 @@ def handler_config(model: str, protocol: str, year: int | None = None) -> dict:
     fit_start, fit_end = seg["train"]
     infer = _swap_processors(official.get("infer_processors", []))
     learn = _swap_processors(official.get("learn_processors", _DEFAULT_LEARN))
+    infer, learn = _apply_variant(model, infer, learn)
     kwargs = {
         "instruments": None,
         "start_time": fit_start,
@@ -196,8 +252,6 @@ def _torch_compat() -> None:
 
     Newer PyTorch removed it; it only toggled log messages.
     """
-    import inspect
-
     import torch
 
     cls = torch.optim.lr_scheduler.ReduceLROnPlateau
@@ -226,7 +280,11 @@ def fit_predict(model: str, seed: int, threads: int, dataset, experiment: str) -
     with R.start(experiment_name=experiment, uri=str(data.CACHE_DIR / "mlruns")):
         m.fit(dataset)
         fit_s = time.time() - t0
-        pred = m.predict(dataset, segment="test")
+        # Qlib's GRU and LSTM time-series models take no segment and score "test".
+        if "segment" in inspect.signature(m.predict).parameters:
+            pred = m.predict(dataset, segment="test")
+        else:
+            pred = m.predict(dataset)
     if isinstance(pred, pd.DataFrame):
         pred = pred.iloc[:, 0]
     return pred.rename("score").astype("float32"), mcfg, fit_s
@@ -245,6 +303,9 @@ def run_roll(model: str, seeds: list[int], threads: int) -> list[Path]:
             pred, mcfgs[s], sec = fit_predict(model, s, threads, ds, f"roll-{model}")
             parts[s].append(pred)
             fit_s[s] += sec
+        # Free this year's processed copies before the next handler is built.
+        del ds
+        gc.collect()
         print(f"{model} roll {year} done", flush=True)
     outs = []
     for s in seeds:
@@ -292,7 +353,7 @@ def run_one(model: str, protocol: str, seed: int, threads: int = 2, dataset=None
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("model", choices=sorted(CONFIGS))
+    ap.add_argument("model", choices=sorted(CONFIGS) + sorted(VARIANTS))
     ap.add_argument("--protocol", choices=sorted(PROTOCOLS) + ["roll"], default="pub")
     ap.add_argument("--seeds", default="0", help="comma-separated, e.g. 0,1,2")
     ap.add_argument("--threads", type=int, default=os.cpu_count() or 1)

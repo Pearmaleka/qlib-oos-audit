@@ -119,3 +119,35 @@ def test_perf_conventions():
     assert p.information_ratio == pytest.approx(x.mean() / x.std(ddof=1) * np.sqrt(238))
     assert p.max_drawdown == pytest.approx(-0.025)
     assert p.days == 5
+
+
+def _procs(model: str, key: str) -> list:
+    return run.handler_config(model, "pub")["kwargs"][key]
+
+
+def test_label_variants_change_only_the_label():
+    for variant, (base, change) in run.VARIANTS.items():
+        if "label" not in change:
+            continue
+        assert run.model_config(variant, 3, 2) == run.model_config(base, 3, 2)
+        assert _procs(variant, "infer_processors") == _procs(base, "infer_processors")
+        label = [
+            p
+            for p in _procs(variant, "learn_processors")
+            if isinstance(p, dict) and p.get("kwargs", {}).get("fields_group") == "label"
+        ]
+        assert [p["class"] for p in label] == [change["label"]]
+        rest = [p for p in _procs(variant, "learn_processors") if p not in label]
+        base_rest = [
+            p
+            for p in _procs(base, "learn_processors")
+            if not (isinstance(p, dict) and p.get("kwargs", {}).get("fields_group") == "label")
+        ]
+        assert rest == base_rest
+
+
+def test_feature_variant_keeps_the_recurrent_columns():
+    first = _procs("lightgbm_f20", "infer_processors")[0]
+    assert first["class"] == "FilterCol"
+    gru_cols = [p for p in _procs("gru", "infer_processors") if p["class"] == "FilterCol"][0]["kwargs"]["col_list"]
+    assert first["kwargs"]["col_list"] == list(gru_cols)
